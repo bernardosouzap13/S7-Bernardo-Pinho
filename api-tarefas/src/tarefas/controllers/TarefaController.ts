@@ -16,8 +16,13 @@ class TarefaController {
     }
 
     list(req: Request, res: Response) {
-        const service= new TarefaService();
-        const tarefas = service.list();
+        const service = new TarefaService();
+        let tarefas = service.list();
+
+        if (req.query.completed !== undefined) {
+            const completed = req.query.completed === 'true';
+            tarefas = tarefas.filter(tarefa => tarefa.completed === completed);
+        }
 
         return res.status(200).json(tarefas);
     }
