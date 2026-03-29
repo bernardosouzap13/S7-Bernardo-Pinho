@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
-import { TarefaService } from "../services/TarefaService.js";
+import { TarefaService } from "../services/TarefaService";
 
 class TarefaController {
-    create(req: Request, res: Response) {
+    async create(req: Request, res: Response) {
         try {
             const{title} = req.body;
             
             const service= new TarefaService();
-            const tarefa = service.create(title);
+            const tarefa = await service.create(title);
 
             return res.status(201).json(tarefa);
         } catch (error: any) {
@@ -15,24 +15,22 @@ class TarefaController {
         }
     }
 
-    list(req: Request, res: Response) {
+    async getAll(req: Request, res: Response) {
         const service = new TarefaService();
-        let tarefas = service.list();
-
+        let completed: boolean | undefined = undefined;
         if (req.query.completed !== undefined) {
-            const completed = req.query.completed === 'true';
-            tarefas = tarefas.filter(tarefa => tarefa.completed === completed);
+            completed = req.query.completed === 'true';
         }
-
+        const tarefas = await service.getAll(completed);
         return res.status(200).json(tarefas);
     }
 
-    searchID(req:Request, res: Response) {
+    async getById(req:Request, res: Response) {
         try {
-            const{id} = req.params;
+            const id = Number (req.params.id);
 
             const service= new TarefaService();
-            const tarefa = service.searchID(Number(id));
+            const tarefa = await service.getById(Number(id));
 
             return res.status(200).json(tarefa);
         } catch(error:any) {
@@ -40,13 +38,13 @@ class TarefaController {
         }
     }
     
-    atualizarTarefa(req: Request, res: Response) {
+    async atualizarTarefa(req: Request, res: Response) {
         try {
-            const { id } = req.params;
+            const id = Number(req.params.id);
             const { title, completed } = req.body;
 
             const service = new TarefaService();
-            const tarefa = service.atualizarTarefa(Number(id), title, completed);
+            const tarefa = await service.atualizarTarefa(Number(id), title, completed);
 
             return res.status(200).json(tarefa);
         } catch (error: any) {
@@ -54,12 +52,12 @@ class TarefaController {
         }
     }
     
-    tarefaDelete(req:Request, res:Response) {
+    async tarefaDelete(req:Request, res:Response) {
         try {
-            const{id} = req.params;
+            const id = Number(req.params.id);
 
             const service = new TarefaService();
-            service.tarefaDelete(Number(id));
+            await service.tarefaDelete(id);
 
             return res.status(204).send();
         } catch (error: any) {
